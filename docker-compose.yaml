@@ -1,0 +1,56 @@
+---
+version: "3.7"
+
+services:
+  tracker0:
+    image: fdfs-tracker:6.06
+  tracker1:
+    image: fdfs-tracker:6.06
+  storage0:
+    image: fdfs-storage:6.06
+    environment:
+      - HTTP_DOMAIN='web0'
+    depends_on:
+      - tracker0
+      - tracker1
+    volumes:
+      - ./storage0:/var/fdfs
+  storage1:
+    image: fdfs-storage:6.06
+    environment:
+      - HTTP_DOMAIN='web1'
+    depends_on:
+      - tracker0
+      - tracker1
+    volumes:
+      - ./storage1:/var/fdfs
+  storage2:
+    environment:
+      - HTTP_DOMAIN='web2'
+    image: fdfs-storage:6.06
+    depends_on:
+      - tracker0
+      - tracker1
+    volumes:
+      - ./storage2:/var/fdfs
+  web0:
+    image: fdfs-nginx:1.19.2
+    depends_on:
+      - storage0
+    network_mode: "service:storage0"
+    volumes:
+      - ./storage0:/var/fdfs
+  web1:
+    image: fdfs-nginx:1.19.2
+    depends_on:
+      - storage1
+    network_mode: "service:storage1"
+    volumes:
+      - ./storage1:/var/fdfs
+  web2:
+    image: fdfs-nginx:1.19.2
+    depends_on:
+      - storage2
+    network_mode: "service:storage2"
+    volumes:
+      - ./storage2:/var/fdfs
